@@ -33,11 +33,9 @@ let
         let
             // Get the specified URL and parse the JSON response
             baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
-            alertPage = Json.Document(Web.Contents(baseUrl,
-            [
+            alertPage = Json.Document(Web.Contents(baseUrl, [
                 RelativePath = Path
-            ]
-            )),
+            ])),
             // Extract the data and links fields and return it
             alertData = try @alertPage[data] otherwise null,
             next = try Text.Replace(@alertPage[links][next], baseUrl, "") otherwise null,

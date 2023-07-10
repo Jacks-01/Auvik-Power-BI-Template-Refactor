@@ -6,7 +6,7 @@
 */
 let
     // Build the URL for the API call
-    // startUrl = "https://auvikapi.us3.my.auvik.com/v1/inventory/device/info?page[first]=50",
+    baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
     /*  Description: Fetches one page of data
         url - URL to fetch data
       Output Parameter:
@@ -16,13 +16,11 @@ let
   */
     getOnePage = (Path) as record =>
         let
-            baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
             // Get the specified URL and parse the JSON response
             devicePage = Json.Document(Web.Contents(baseUrl, [RelativePath = Path])),
             // Extract the data and links fields and return it
             deviceData = try @devicePage[data] otherwise null,
             next = try Text.Replace(@devicePage[links][next], baseUrl, "") otherwise null,
-            // result = try deviceData & @getOnePage(next) otherwise @deviceData,
             ret = [retData = @deviceData, retNext = @next]
         in
             ret,
