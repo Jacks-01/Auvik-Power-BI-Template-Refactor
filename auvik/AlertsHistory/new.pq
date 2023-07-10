@@ -29,14 +29,19 @@ let
         retData - data for current page
         retNext - URL for next page
   */
-    getOnePage = (url) as record =>
+    getOnePage = (Path) as record =>
         let
             // Get the specified URL and parse the JSON response
-            alertPage = Json.Document(Web.Contents(url)),
+            baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1",
+            alertPage = Json.Document(Web.Contents(baseUrl,
+            [
+                RelativePath = Path
+            ]
+            )),
             // Extract the data and links fields and return it
-            alertData = try alertPage[data] otherwise null,
-            next = try alertPage[links][next] otherwise null,
-            ret = [retData = alertData, retNext = next]
+            alertData = try @alertPage[data] otherwise null,
+            next = try Text.Replace(@alertPage[links][next], baseUrl, "") otherwise null,
+            ret = [retData = @alertData, retNext = @next]
         in
             ret,
     /*  Description: Fetches data for one period
@@ -51,19 +56,18 @@ let
             auvikPeriodStart = toAuvikAPIDate(periodStart),
             auvikPeriodEnd = toAuvikAPIDate(Date.AddDays(periodEnd, 1)),
             // Build the URL for the API call
-            urlPrefix = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/alert/history/info",
             timefilter = "filter[detectedTimeAfter]="
                 & auvikPeriodStart
                 & "T00:00:00.000Z"
                 & "&filter[detectedTimeBefore]="
                 & auvikPeriodEnd
                 & "T00:00:00.000Z",
-            pagination = "page[first]=50",
-            startUrl = urlPrefix & "?" & timefilter & "&" & pagination,
+            // pagination = "page[first]=50",
+            urlParameters = "/alert/history/info" & "?" & timefilter & "&",
             // Fetch each page until there are no more pages by following the next link. Append subsequent pages.
             periodDataList = List.Generate(
                 // Fetch the first page
-                () => [ret = getOnePage(startUrl)],
+                () => [ret = getOnePage(urlParameters)],
                 // Stop when there is no more data
                 each[ret][retData] <> null,
                 // Get the next page using the next link
