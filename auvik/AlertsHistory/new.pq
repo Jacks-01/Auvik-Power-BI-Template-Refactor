@@ -32,7 +32,7 @@ let
     getOnePage = (Path) as record =>
         let
             // Get the specified URL and parse the JSON response
-            baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1",
+            baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
             alertPage = Json.Document(Web.Contents(baseUrl,
             [
                 RelativePath = Path
@@ -63,7 +63,7 @@ let
                 & auvikPeriodEnd
                 & "T00:00:00.000Z",
             // pagination = "page[first]=50",
-            urlParameters = "/alert/history/info" & "?" & timefilter & "&",
+            urlParameters = "alert/history/info" & "?" & timefilter & "&",
             // Fetch each page until there are no more pages by following the next link. Append subsequent pages.
             periodDataList = List.Generate(
                 // Fetch the first page
