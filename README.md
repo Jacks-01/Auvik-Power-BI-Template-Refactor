@@ -45,9 +45,11 @@ Huge credit goes to Chris Webb's blog, where he goes into more detail on the `We
 <https://blog.crossjoin.co.uk/2014/03/26/working-with-web-services-in-power-query/>
 <https://blog.crossjoin.co.uk/2016/08/23/web-contents-m-functions-and-dataset-refresh-errors-in-power-bi/>
 
+**This is a modification to the Auvik Power BI Template**: [Auvik Github](https://github.com/auvik/powerbi-templates)
+
 ## The Solution
 
-*Note:* *I am making these changes in Power BI desktop using the `.pbix` template provided by Auvik's github*
+*Note:* *I am making these changes in Power BI desktop using the `.pbix` template provided by [Auvik's github](https://github.com/auvik/powerbi-templates)*
 
 After uploading the provided Auvik template and entering your credentials, follow these steps:
 
@@ -66,7 +68,7 @@ After uploading the provided Auvik template and entering your credentials, follo
     - `REPORT END DATE`
     - `AUVIK SERVER CLUSTER`
 
-## Questions
+## Questions / Contact
 
 Please reach out to me at `jack.stubblefield.dev@gmail.com` with any quesitons
 
