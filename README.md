@@ -4,7 +4,7 @@
 
 If you want to upload your dashboard to the web version of Power BI, you have run into the following error:
 
-![!\[Alt text\](image-1.png)](data-refresh.png)
+![data refresh error](/images/data-refresh.png)
 
 This is because of the way the queries are structured in the editor. The calls made to the Auvik API are considered "dynamic" because their query string has variables that aren't static at runtime.
 
@@ -52,11 +52,11 @@ Huge credit goes to Chris Webb's blog, where he goes into more detail on the `We
 After uploading the provided Auvik template and entering your credentials, follow these steps:
 
 1. Make sure you are on the `Home` tab
-2. Select `Transform Data` ![Home Tab](image.png)
-3. You should now see a list of all the data sources on the left sidebar. Click on the source `Sites`. Then select `Advanced Editor` on your toolbar. ![Advanced Editor](image-1.png)
-4. You will be presented with something that looks like this. ![Advanced Editor](image-4.png)
-5. Find the folder corresponding to the source you are working on (i.e. Sites), and select the `new.pq` file. ![new.pq file](image-3.png)
-6. Copy all of the contents and paste them back into your advanced editor screen on Power BI. It should look something like this - ![Advanced Editor 2](image-2.png).
+2. Select `Transform Data` ![Home Tab](/images/image.png)
+3. You should now see a list of all the data sources on the left sidebar. Click on the source `Sites`. Then select `Advanced Editor` on your toolbar. ![Advanced Editor](/images/image-1.png)
+4. You will be presented with something that looks like this. ![Advanced Editor](/images/image-4.png)
+5. Find the folder corresponding to the source you are working on (i.e. Sites), and select the `new.pq` file. ![new.pq file](images/image-3.png)
+6. Copy all of the contents and paste them back into your advanced editor screen on Power BI. It should look something like this - ![Advanced Editor 2](/images/image-2.png).
 7. Hit the green `Done` button in the bottom right corner, and verify that your data was refreshed correctly.
 8. Repeat these steps for each source **EXCEPT THE FOLLOWING**:
     - `TIME`
