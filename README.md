@@ -66,12 +66,9 @@ After uploading the provided Auvik template and entering your credentials, follo
     - `REPORT END DATE`
     - `AUVIK SERVER CLUSTER`
 
-## Contributing
+## Questions
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
+Please reach out to me at `jack.stubblefield.dev@gmail.com` with any quesitons
 
 ## License
 
