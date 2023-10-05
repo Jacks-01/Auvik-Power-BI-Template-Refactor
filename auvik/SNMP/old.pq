@@ -1,6 +1,4 @@
 let
-
-
     Source = Json.Document(
         Web.Contents(
             "https://auvikapi.us3.my.auvik.com/v1"

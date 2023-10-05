@@ -1,34 +1,34 @@
 let
-    /*  Description: Takes in a date and converts it to the format needed for the Auvik API.
+    SourceQuery =
+        let
+            /*  Description: Takes in a date and converts it to the format needed for the Auvik API.
       Input Parameter:
         origDate - Date to convert
       Output Parameter:
         auvikDate - origDate converted to format needed for Auvik API 
   */
-    toAuvikAPIDate = (origDate as date) as text =>
-        let
-            auvikDate = Number.ToText(Date.Year(origDate))
-                & "-"
-                & Text.PadStart(Number.ToText(Date.Month(origDate)), 2, "0")
-                & "-"
-                & Text.PadStart(Number.ToText(Date.Day(origDate)), 2, "0")
-        in
-            auvikDate,
-    baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
-    getOnePage = (Path) as record =>
-        let
-            parsedResults = Json.Document(Web.Contents(baseUrl, [
-                RelativePath = Path
-            ])),
-            parsedData = try @parsedResults[data] otherwise null,
-            next = try Text.Replace(@parsedResults[links][next], baseUrl, "") otherwise null,
-            ret = [retData = @parsedData, retNext = @next]
-        in
-            ret,
-    getOnePeriod = (periodStart as date, periodEnd as date) as list =>
-        let
-            auvikPeriodStart = toAuvikAPIDate(periodStart),
-            auvikPeriodEnd = toAuvikAPIDate(Date.AddDays(periodEnd, 1)),
+            toAuvikAPIDate = (origDate as date) as text =>
+                let
+                    auvikDate = Number.ToText(Date.Year(origDate))
+                        & "-"
+                        & Text.PadStart(Number.ToText(Date.Month(origDate)), 2, "0")
+                        & "-"
+                        & Text.PadStart(Number.ToText(Date.Day(origDate)), 2, "0")
+                in
+                    auvikDate,
+            baseUrl = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/",
+            getOnePage = (Path) as any =>
+                let
+                    parsedResults = Json.Document(Web.Contents(baseUrl, [
+                        RelativePath = Path
+                    ])),
+                    parsedData = try @parsedResults[data] otherwise null
+                in
+                    parsedResults,
+            startDate = #"Report Start Date",
+            endDate = #"Report End Date",
+            auvikPeriodStart = toAuvikAPIDate(startDate),
+            auvikPeriodEnd = toAuvikAPIDate(Date.AddDays(endDate, 1)),
             urlPrefix = "https://auvikapi." & #"Auvik Server Cluster" & ".my.auvik.com/v1/stat/snmppoller/string",
             timeFilter = "filter[fromTime]="
                 & auvikPeriodStart
@@ -36,61 +36,30 @@ let
                 & "&filter[thruTime]="
                 & auvikPeriodEnd
                 & "T00:00:00.000Z"
-                & "&filter[interval]=hour"
                 & "&filter[compact]=true",
-            tenants = "tenants="
-                & "987248487654760189,987248487654792957,992315340152315645,997394647852326653,997394647855636221,997394647856422653,997394647856455421,997394647859404541,997394647859666685,997394647860059901,997394647860354813,997394647862910717,997394647863009021,997394647863041789,997394647863303933,1002475458819137277",
-            pagination = "page[first]=50",
+            tenants = "tenants=" & "992315340152315645",
             urlParameters = "stat/snmppoller/string" & "?" & timeFilter & "&" & tenants,
-            periodDataList = List.Generate(
-                () => [ret = getOnePage(urlParameters)],
-                each[ret][retData] <> null,
-                each [ret = getOnePage([ret][retNext])],
-                each[ret][retData]
-            )
+            // Generate a list of periods
+            periods = List.Generate(
+                () => [startDate = startDate, endDate = Date.AddDays(startDate, 29)],
+                each [endDate] <= endDate,
+                each [startDate = Date.AddDays([endDate], 1), endDate = Date.AddDays([endDate], 30)],
+                each [startDate]
+            ),
+            // Fetch data for each period
+            periodDataList = List.Transform(periods, each getOnePage(urlParameters))
         in
             periodDataList,
-    // Determine how many separate queries we have to make to get the entire desired time range
-    // API hourly data limit in days
-    maxHourlyPeriod = 30,
-    startDate = #"Report Start Date",
-    endDate = #"Report End Date",
-    numPeriods = Number.RoundUp((Duration.Days(Duration.From(endDate - startDate)) + 1) / maxHourlyPeriod),
-    currEndDate = if numPeriods = 1 then endDate else Date.AddDays(startDate, maxHourlyPeriod - 1),
-    // Iterate through each period and combine the data
-    statsList = List.Generate(
-        () =>
-            [
-                currentPeriod = 1,
-                currentStartDate = startDate,
-                currentEndDate = currEndDate,
-                ret = getOnePeriod(currentStartDate, currentEndDate)
-            ],
-        each [currentPeriod] <= numPeriods,
-        each
-            [
-                currentPeriod = [currentPeriod] + 1,
-                currentStartDate = Date.AddDays([currentStartDate], maxHourlyPeriod),
-                currentEndDate = if currentPeriod = numPeriods then
-                    endDate
-                else
-                    Date.AddDays([currentEndDate], maxHourlyPeriod),
-                ret = getOnePeriod(currentStartDate, currentEndDate)
-            ],
-        each [ret]
-    ),
-    // statsListTable = Table.FromList(statsList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
-    // innerStatsListTable = Table.ExpandListColumn(statsListTable, "Column1"),
-    // statsTable = Table.ExpandListColumn(innerStatsListTable, "Column1"),
-    //* changed data to statsList in below step
-    #"Converted to Table" = Table.FromList(statsList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    SourceQuery1 = SourceQuery{0},
+    data = SourceQuery1[data],
+    #"Converted to Table" = Table.FromList(data, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
     #"Expanded Column1" = Table.ExpandRecordColumn(
         #"Converted to Table",
         "Column1",
         {"attributes", "id", "relationships", "type"},
         {"Column1.attributes", "Column1.id", "Column1.relationships", "Column1.type"}
     ),
-    #"Expanded Column1.relationships" = Table.ExpandRecordColumn(
+     #"Expanded Column1.relationships" = Table.ExpandRecordColumn(
         #"Expanded Column1",
         "Column1.relationships",
         {"device", "tenant"},
