@@ -59,7 +59,7 @@ let
         {"attributes", "id", "relationships", "type"},
         {"Column1.attributes", "Column1.id", "Column1.relationships", "Column1.type"}
     ),
-     #"Expanded Column1.relationships" = Table.ExpandRecordColumn(
+    #"Expanded Column1.relationships" = Table.ExpandRecordColumn(
         #"Expanded Column1",
         "Column1.relationships",
         {"device", "tenant"},
@@ -149,13 +149,22 @@ let
     ),
     #"Grouped Rows" = Table.Group(
         #"Changed Type",
-        {"Device Id"},
+        {"Device Id", "SNMP Id"},
         {
             {"MinCount", each List.Min([Page Count]), type nullable number},
             {"MaxCount", each List.Max([Page Count]), type nullable number},
             {"MinDate", each List.Min([DateTime]), type nullable datetime},
             {"MaxDate", each List.Max([DateTime]), type nullable datetime}
         }
+    ),
+    #"Filtered Rows" = Table.SelectRows(
+        #"Grouped Rows",
+        each
+            (
+                [SNMP Id] <> "OTkyMzE1MzQwMTUyMzE1NjQ1LDk5NzM5NDY1MDcyNzcxODc5NCwxLDk5MjMxNTM0Mzg1ODAxNTQ5Nw"
+                and [SNMP Id] <> "OTkyMzE1MzQwMTUyMzE1NjQ1LDk5NzM5NDY1MDcyNzcxODc5NCwxLDk5MjMxNTM0Mzg2MjQwNjQwOQ"
+                and [SNMP Id] <> "OTkyMzE1MzQwMTUyMzE1NjQ1LDk5NzM5NDY1MDcyNzcxODc5NCwxLDk5MjMxNTM0Mzg2NDk2MjMxMw"
+            )
     )
 in
-    #"Grouped Rows"
+    #"Filtered Rows"
